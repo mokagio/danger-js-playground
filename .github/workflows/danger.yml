@@ -43,8 +43,10 @@ jobs:
         run: yarn install --frozen-lockfile
 
       - name: Check Stuff with Danger ⚠️
-        # As a first step, let's verify the `ci` command can run a Dangerfile
-        # importing more Dangerfiles.
+        # Notice the use of the remote Dangerfile option. We've established
+        # Danger can resolve the imports when running locally in
+        # https://github.com/mokagio/danger-js-playground/pull/1/commits/b94cf3838a9c202597d0657104e42b5ecf5256d6,
+        # but can it when the Dangerfile is remote?
         run: |
           DEBUG="*" yarn run danger ci \
-            --dangerfile dangerfiles/multiple_checks.ts
+            --dangerfile mokagio/danger-js-playground/dangerfiles/multiple_checks.ts
