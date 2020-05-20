@@ -11,6 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # See https://github.com/danger/danger-js/issues/1042
+      DANGER_GITHUB_API_BASE_URL: "https://api.github.com"
     steps:
       # For debugging
       - name: Dump GitHub Context
