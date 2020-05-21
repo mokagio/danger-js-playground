@@ -49,4 +49,4 @@ jobs:
         # but can it when the Dangerfile is remote?
         run: |
           DEBUG="*" yarn run danger ci \
-            --dangerfile dangerfiles/multiple_checks.ts
+            --dangerfile mokagio/danger-js-playground/dangerfiles/multiple_checks.ts
