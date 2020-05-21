@@ -1,0 +1,52 @@
+name: Run Checks with Danger
+on:
+  pull_request:
+    # Because we have a rule that validates the PR labels, we want it to run
+    # when the labels change, not only when a PR is opened/reopened or changes
+    # are pushed to it.
+    types: [opened, reopened, synchronize, labeled, unlabeled]
+
+jobs:
+  danger:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # See https://github.com/danger/danger-js/issues/1042
+      DANGER_GITHUB_API_BASE_URL: "https://api.github.com"
+    steps:
+      # For debugging
+      - name: Dump GitHub Context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 10.x
+
+      - name: Install Yarn
+        run: npm install -g yarn
+
+      - name: Cache Node Modules
+        id: cache-node-modules
+        uses: actions/cache@v1
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node_modules-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: ${{ runner.os }}-node_modules
+
+      - name: Yarn Install
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        # frozen-lockfile will make the build fail if the lockfile is not there
+        run: yarn install --frozen-lockfile
+
+      - name: Check Stuff with Danger ⚠️
+        # Notice the use of the remote Dangerfile option. We've established
+        # Danger can resolve the imports when running locally in
+        # https://github.com/mokagio/danger-js-playground/pull/1/commits/b94cf3838a9c202597d0657104e42b5ecf5256d6,
+        # but can it when the Dangerfile is remote?
+        run: |
+          DEBUG="*" yarn run danger ci \
+            --dangerfile dangerfiles/multiple_checks.ts
