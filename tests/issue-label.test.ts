@@ -1,31 +1,29 @@
-jest.mock("danger", () => jest.fn());
-import * as danger from "danger";
-const dm = danger as any;
-
 import {checkLabel as label} from "../dangerfiles/label";
 
-// The mocked data and return values for calls the rule makes.
+// Because Danger strips Danger's imports at runtime, we don't import Danger in
+// our sources. Instead, we simply assume they exist in the global namespace.
+// In the tests, we need to provide a test double for everything, though.
+declare const global: any
 beforeEach(() => {
-    dm.warn = jest.fn().mockReturnValue(true);
-
-    dm.danger = {
-        github: {
-            issue: {
-                labels: []
-            },
-        },
-    };
-});
+  global.warn = jest.fn()
+  global.danger = {
+    github: {
+      issue: {
+        labels: []
+      }
+   }
+  }
+})
 
 describe("issue label checks", () => {
     it("warns when there is no label", async () => {
         await label();
 
-        expect(dm.warn).toHaveBeenCalledWith("PR is missing at least one label.");
+        expect(global.warn).toHaveBeenCalledWith("PR is missing at least one label.");
     })
 
     it("does not warn when there is a label", async () => {
-        dm.danger.github.issue.labels = [
+        global.danger.github.issue.labels = [
             {
                 name: 'a label'
             }
@@ -33,11 +31,11 @@ describe("issue label checks", () => {
 
         await label();
 
-        expect(dm.warn).not.toHaveBeenCalled();
+        expect(global.warn).not.toHaveBeenCalled();
     })
 
     it("does not warn when there are more than one label", async () => {
-        dm.danger.github.issue.labels = [
+        global.danger.github.issue.labels = [
             {
                 name: 'a label'
             },
@@ -48,6 +46,6 @@ describe("issue label checks", () => {
 
         await label();
 
-        expect(dm.warn).not.toHaveBeenCalled();
+        expect(global.warn).not.toHaveBeenCalled();
     })
 })
