@@ -12,3 +12,5 @@ DANGER_GITHUB_API_TOKEN=*** \
   --dangerfile dangerfiles/multiple_checks.ts \
   https://github.com/mokagio/danger-github-actions-examples/pull/2
 ```
+
+---
